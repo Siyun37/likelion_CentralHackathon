@@ -34,7 +34,7 @@ public class PreregistrationService {
         Preregistration preregistration;
         try {
             preregistration = preregistrationRepository.save(
-                    new Preregistration(request.customerId(), request.productId(), request.name(), request.phone(), consentAt)
+                    new Preregistration(request.customerId(), request.productId(), request.name(), request.phone(), consentAt, request.color(), request.size())
             );
         } catch (DataIntegrityViolationException e) {
             throw new DuplicatePreregistrationException(request.customerId(), request.productId());

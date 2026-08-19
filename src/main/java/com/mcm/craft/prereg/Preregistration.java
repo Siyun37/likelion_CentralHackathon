@@ -40,15 +40,21 @@ public class Preregistration {
 
     private LocalDateTime consentAt;
 
+    private String color;
+
+    private String size;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    public Preregistration(String customerId, Long productId, String nameEnc, String phoneEnc, LocalDateTime consentAt) {
+    public Preregistration(String customerId, Long productId, String nameEnc, String phoneEnc, LocalDateTime consentAt, String color, String size) {
         this.customerId = customerId;
         this.productId = productId;
         this.nameEnc = nameEnc;
         this.phoneEnc = phoneEnc;
         this.consentAt = consentAt;
+        this.color = color;
+        this.size = size;
         this.createdAt = LocalDateTime.now();
     }
 }

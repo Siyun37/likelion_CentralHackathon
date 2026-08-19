@@ -9,6 +9,8 @@ public record PreregistrationRequest(
         @NotNull @Schema(example = "1") Long productId,
         @NotBlank @Schema(example = "홍길동") String name,
         @NotBlank @Schema(example = "010-1234-5678") String phone,
-        @NotNull @Schema(example = "true") Boolean consent
+        @NotNull @Schema(example = "true") Boolean consent,
+        @Schema(example = "black") String color,
+        @Schema(example = "M") String size
 ) {
 }
