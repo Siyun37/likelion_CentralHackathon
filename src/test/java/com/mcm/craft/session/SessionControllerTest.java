@@ -24,8 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 class SessionControllerTest extends ApiTestSupport {
 
-    private static final Pattern UUID_PATTERN = Pattern.compile(
-            "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
+    private static final Pattern CUSTOMER_ID_PATTERN = Pattern.compile("^cus_\\d{4,}$");
 
     @Autowired
     private CustomerRepository customerRepository;
@@ -35,8 +34,8 @@ class SessionControllerTest extends ApiTestSupport {
     // ---------------------------------------------------------------
 
     @Test
-    @DisplayName("정상 요청 시 200 응답과 UUID 형식의 customer_id 반환")
-    void createSession_returnsUuidCustomerId() throws Exception {
+    @DisplayName("정상 요청 시 200 응답과 cus_0001 형식의 customer_id 반환")
+    void createSession_returnsFormattedCustomerId() throws Exception {
         String body = mockMvc.perform(post("/v1/sessions")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -48,8 +47,7 @@ class SessionControllerTest extends ApiTestSupport {
 
         assertThat(body).contains("customer_id");
         String customerId = com.jayway.jsonpath.JsonPath.read(body, "$.customer_id");
-        assertThat(UUID_PATTERN.matcher(customerId).matches()).isTrue();
-        assertThat(UUID.fromString(customerId)).isNotNull();
+        assertThat(CUSTOMER_ID_PATTERN.matcher(customerId).matches()).isTrue();
     }
 
     @Test
@@ -82,7 +80,7 @@ class SessionControllerTest extends ApiTestSupport {
     }
 
     @Test
-    @DisplayName("호출할 때마다 customer_id가 매번 다르게 생성됨 (중복 없는 UUID)")
+    @DisplayName("호출할 때마다 customer_id가 매번 다르게 생성됨 (중복 없는 순차 ID)")
     void createSession_generatesUniqueCustomerIdEachCall() throws Exception {
         Set<String> ids = new HashSet<>();
         for (int i = 0; i < 20; i++) {
@@ -103,7 +101,7 @@ class SessionControllerTest extends ApiTestSupport {
                 .andReturn().getResponse().getContentAsString();
         String customerId = com.jayway.jsonpath.JsonPath.read(body, "$.customer_id");
 
-        Optional<Customer> saved = customerRepository.findById(UUID.fromString(customerId));
+        Optional<Customer> saved = customerRepository.findById(customerId);
         assertThat(saved).isPresent();
         Customer customer = saved.get();
         assertThat(customer.isIdentified()).isFalse();
@@ -120,16 +118,16 @@ class SessionControllerTest extends ApiTestSupport {
     // PATCH /v1/sessions/{customerId}/profile
     // ---------------------------------------------------------------
 
-    private UUID createCustomer() throws Exception {
+    private String createCustomer() throws Exception {
         String body = mockMvc.perform(post("/v1/sessions").contentType(MediaType.APPLICATION_JSON).content("{}"))
                 .andReturn().getResponse().getContentAsString();
-        return UUID.fromString(com.jayway.jsonpath.JsonPath.read(body, "$.customer_id"));
+        return com.jayway.jsonpath.JsonPath.read(body, "$.customer_id");
     }
 
     @Test
     @DisplayName("존재하는 customer_id로 정상 프로필 전송 시 200 및 DB 반영")
     void updateProfile_withFullPayload_persistsToDb() throws Exception {
-        UUID customerId = createCustomer();
+        String customerId = createCustomer();
 
         mockMvc.perform(patch("/v1/sessions/{customerId}/profile", customerId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -149,7 +147,7 @@ class SessionControllerTest extends ApiTestSupport {
     @Test
     @DisplayName("일부 필드만 보내도(나머지는 null) 보낸 필드만 정상 반영됨")
     void updateProfile_withPartialPayload_onlyUpdatesProvidedFields() throws Exception {
-        UUID customerId = createCustomer();
+        String customerId = createCustomer();
 
         mockMvc.perform(patch("/v1/sessions/{customerId}/profile", customerId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -169,7 +167,7 @@ class SessionControllerTest extends ApiTestSupport {
     @Test
     @DisplayName("모든 필드를 null로 보내는 Skip 케이스도 정상 처리(200), 값 변경 없음")
     void updateProfile_withAllNullFields_isNoOpAndReturns200() throws Exception {
-        UUID customerId = createCustomer();
+        String customerId = createCustomer();
 
         mockMvc.perform(patch("/v1/sessions/{customerId}/profile", customerId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -190,7 +188,7 @@ class SessionControllerTest extends ApiTestSupport {
     @DisplayName("존재하지 않는 customer_id로 요청 시 404 응답 " +
             "(SessionService가 CustomerNotFoundException을 던지고 GlobalExceptionHandler가 404로 매핑)")
     void updateProfile_nonExistentCustomerId_returns404() throws Exception {
-        UUID unknownId = UUID.randomUUID();
+        String unknownId = UUID.randomUUID().toString();
 
         mockMvc.perform(patch("/v1/sessions/{customerId}/profile", unknownId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -204,7 +202,7 @@ class SessionControllerTest extends ApiTestSupport {
     @DisplayName("height에 비현실적인 값(음수/300)을 넣었을 때의 현재 동작 확인 " +
             "(DTO에 검증 애노테이션이 없어 현재는 그대로 통과/저장됨 - validation 부재 확인용)")
     void updateProfile_withUnrealisticHeight_currentlyPassesThrough() throws Exception {
-        UUID customerId = createCustomer();
+        String customerId = createCustomer();
 
         mockMvc.perform(patch("/v1/sessions/{customerId}/profile", customerId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -213,7 +211,7 @@ class SessionControllerTest extends ApiTestSupport {
                                 """))
                 .andExpect(status().isOk());
 
-        UUID customerId2 = createCustomer();
+        String customerId2 = createCustomer();
         mockMvc.perform(patch("/v1/sessions/{customerId}/profile", customerId2)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -229,7 +227,7 @@ class SessionControllerTest extends ApiTestSupport {
     @DisplayName("age/height/weight에 문자열 등 잘못된 타입을 보내면 400 응답이어야 함 " +
             "(GlobalExceptionHandler#handleMessageNotReadable가 HttpMessageNotReadableException을 400으로 매핑)")
     void updateProfile_withWrongType_returns400() throws Exception {
-        UUID customerId = createCustomer();
+        String customerId = createCustomer();
 
         mockMvc.perform(patch("/v1/sessions/{customerId}/profile", customerId)
                         .contentType(MediaType.APPLICATION_JSON)

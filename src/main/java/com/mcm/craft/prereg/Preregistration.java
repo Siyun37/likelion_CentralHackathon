@@ -12,7 +12,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Entity
 @Table(
@@ -28,7 +27,7 @@ public class Preregistration {
     private Long id;
 
     @Column(nullable = false)
-    private UUID customerId;
+    private String customerId;
 
     @Column(nullable = false)
     private Long productId;
@@ -44,7 +43,7 @@ public class Preregistration {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    public Preregistration(UUID customerId, Long productId, String nameEnc, String phoneEnc, LocalDateTime consentAt) {
+    public Preregistration(String customerId, Long productId, String nameEnc, String phoneEnc, LocalDateTime consentAt) {
         this.customerId = customerId;
         this.productId = productId;
         this.nameEnc = nameEnc;

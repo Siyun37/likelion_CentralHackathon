@@ -11,7 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * 3. GET /v1/products?launch_status=dummy
  *
- * ProductDataSeeder가 애플리케이션 기동 시 launch_status="dummy" 상품 6개를 시드한다.
+ * data.sql이 애플리케이션 기동 시 launch_status="dummy" 상품 6개를 시드한다.
  * 시드는 컨텍스트 최초 기동 때 한 번, 별도 트랜잭션으로 커밋되므로
  * 각 테스트 메서드의 @Transactional 롤백과 무관하게 항상 조회 가능하다.
  */

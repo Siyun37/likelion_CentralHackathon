@@ -13,7 +13,6 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Entity
 @Table(name = "events")
@@ -32,7 +31,7 @@ public class Event {
     private String eventType;
 
     @Column(nullable = false)
-    private UUID customerId;
+    private String customerId;
 
     // "timestamp"는 SQL 예약어라 event_timestamp로 매핑(Hibernate 기본 네이밍 전략에 의해 자동 변환됨)
     private LocalDateTime eventTimestamp;
@@ -45,7 +44,7 @@ public class Event {
     @Column(nullable = false)
     private LocalDateTime receivedAt;
 
-    public Event(String eventId, String eventType, UUID customerId, LocalDateTime eventTimestamp,
+    public Event(String eventId, String eventType, String customerId, LocalDateTime eventTimestamp,
                  String interactionId, String meta) {
         this.eventId = eventId;
         this.eventType = eventType;

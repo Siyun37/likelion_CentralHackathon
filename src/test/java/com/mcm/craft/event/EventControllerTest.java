@@ -50,7 +50,7 @@ class EventControllerTest extends ApiTestSupport {
     @Test
     @DisplayName("정상 이벤트 배열(1개 이상) 전송 시 200 응답")
     void processBatch_withEvents_returns200() throws Exception {
-        UUID customerId = UUID.randomUUID();
+        String customerId = UUID.randomUUID().toString();
 
         mockMvc.perform(post(ENDPOINT)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -75,7 +75,7 @@ class EventControllerTest extends ApiTestSupport {
     @Test
     @DisplayName("이벤트 전송 시 Event 테이블에 실제로 row가 INSERT되고 필드가 정확히 매핑됨")
     void processBatch_persistsEventWithAllFields() throws Exception {
-        UUID customerId = UUID.randomUUID();
+        String customerId = UUID.randomUUID().toString();
 
         mockMvc.perform(post(ENDPOINT)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -113,7 +113,7 @@ class EventControllerTest extends ApiTestSupport {
     @Test
     @DisplayName("동일 event_id로 재전송(중복)해도 DB에는 한 건만 저장됨")
     void processBatch_duplicateEventId_isSkipped() throws Exception {
-        UUID customerId = UUID.randomUUID();
+        String customerId = UUID.randomUUID().toString();
         String body = """
                 {
                   "customer_id": "%s",
@@ -142,7 +142,7 @@ class EventControllerTest extends ApiTestSupport {
     @Test
     @DisplayName("timestamp/interaction_id/meta가 없는 이벤트(session_start 등)도 null 필드로 정상 저장됨")
     void processBatch_withoutOptionalFields_persistsWithNulls() throws Exception {
-        UUID customerId = UUID.randomUUID();
+        String customerId = UUID.randomUUID().toString();
 
         mockMvc.perform(post(ENDPOINT)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -175,7 +175,7 @@ class EventControllerTest extends ApiTestSupport {
             "(※ EventBatchRequest.events는 @NotEmpty이므로 현재는 400이 반환됨. " +
             "체크리스트가 기대하는 '에러 없이 200'과 배치되므로 정책 확인 필요)")
     void processBatch_withEmptyEvents_currentlyReturns400() throws Exception {
-        UUID customerId = UUID.randomUUID();
+        String customerId = UUID.randomUUID().toString();
 
         mockMvc.perform(post(ENDPOINT)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -188,7 +188,7 @@ class EventControllerTest extends ApiTestSupport {
     @Test
     @DisplayName("각 이벤트 필드(event_id/event_type/customer_id/timestamp/interaction_id/meta)가 로그에 정상 파싱되어 찍힘")
     void processBatch_logsAllEventFields() throws Exception {
-        UUID customerId = UUID.randomUUID();
+        String customerId = UUID.randomUUID().toString();
 
         mockMvc.perform(post(ENDPOINT)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -223,7 +223,7 @@ class EventControllerTest extends ApiTestSupport {
     @Test
     @DisplayName("meta 안의 다양한 필드(product_id, duration_sec, occurrence_index)가 타입 손실 없이 로그에 찍힘")
     void processBatch_logsMetaFieldsWithoutTypeLoss() throws Exception {
-        UUID customerId = UUID.randomUUID();
+        String customerId = UUID.randomUUID().toString();
 
         mockMvc.perform(post(ENDPOINT)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -257,7 +257,7 @@ class EventControllerTest extends ApiTestSupport {
     @Test
     @DisplayName("session_start/session_end처럼 interaction_id/occurrence_index가 없는 이벤트도 에러 없이 처리")
     void processBatch_withoutInteractionIdOrOccurrenceIndex_returns200() throws Exception {
-        UUID customerId = UUID.randomUUID();
+        String customerId = UUID.randomUUID().toString();
 
         mockMvc.perform(post(ENDPOINT)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -286,7 +286,7 @@ class EventControllerTest extends ApiTestSupport {
     @Test
     @DisplayName("event_type이 명세서에 없는 낯선 값이어도 서버가 죽지 않고 200 처리")
     void processBatch_withUnknownEventType_stillReturns200() throws Exception {
-        UUID customerId = UUID.randomUUID();
+        String customerId = UUID.randomUUID().toString();
 
         mockMvc.perform(post(ENDPOINT)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -309,7 +309,7 @@ class EventControllerTest extends ApiTestSupport {
     @Test
     @DisplayName("대량 이벤트(100개 이상)를 한 번에 보내도 타임아웃 없이 처리")
     void processBatch_withLargeNumberOfEvents_isProcessedSuccessfully() throws Exception {
-        UUID customerId = UUID.randomUUID();
+        String customerId = UUID.randomUUID().toString();
         int eventCount = 150;
 
         String events = IntStream.range(0, eventCount)

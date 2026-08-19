@@ -6,10 +6,9 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
-import java.util.UUID;
 
 public record EventBatchRequest(
-        @NotNull @Schema(example = "c6b5508a-b6ca-4ae0-980a-2e46a7fd4af4") UUID customerId,
+        @NotNull @Schema(example = "cus_0001") String customerId,
         @NotEmpty List<@Valid EventDto> events
 ) {
 }

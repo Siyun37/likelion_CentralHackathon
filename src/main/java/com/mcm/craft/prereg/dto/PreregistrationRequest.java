@@ -4,10 +4,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-import java.util.UUID;
-
 public record PreregistrationRequest(
-        @NotNull @Schema(example = "c6b5508a-b6ca-4ae0-980a-2e46a7fd4af4") UUID customerId,
+        @NotNull @Schema(example = "cus_0001") String customerId,
         @NotNull @Schema(example = "1") Long productId,
         @NotBlank @Schema(example = "홍길동") String name,
         @NotBlank @Schema(example = "010-1234-5678") String phone,

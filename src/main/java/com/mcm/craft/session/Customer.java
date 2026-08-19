@@ -9,7 +9,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Entity
 @Table(name = "customers")
@@ -18,7 +17,7 @@ import java.util.UUID;
 public class Customer {
 
     @Id
-    private UUID id;
+    private String id;
 
     private String gender;
 
@@ -38,9 +37,9 @@ public class Customer {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    public static Customer create() {
+    public static Customer create(String id) {
         Customer customer = new Customer();
-        customer.id = UUID.randomUUID();
+        customer.id = id;
         customer.isIdentified = false;
         customer.createdAt = LocalDateTime.now();
         return customer;
