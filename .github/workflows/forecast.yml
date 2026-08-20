@@ -1,0 +1,31 @@
+name: PHANTOM STOCK 수요 예측
+
+on:
+  workflow_dispatch: {}          # Actions 탭에서 수동으로 "Run workflow" 클릭 가능
+  schedule:
+    - cron: "0 * * * *"          # 매 정각 자동 실행 (원치 않으면 이 두 줄 삭제)
+  push:
+    paths:
+      - "forecast/**"            # forecast 폴더가 바뀔 때만 실행 (백엔드 코드와 무관)
+
+jobs:
+  forecast:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: forecast
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 의존성 설치
+        run: pip install -r requirements.txt
+
+      - name: 모델 실행 및 Supabase 저장
+        env:
+          SB_URL: ${{ secrets.SB_URL }}
+          SB_SECRET: ${{ secrets.SB_SECRET }}
+        run: python run_forecast.py
